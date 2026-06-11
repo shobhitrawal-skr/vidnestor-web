@@ -197,7 +197,7 @@ export default function Home() {
       setStatus({ type: 'success', text: 'Download completed successfully!' });
 
       // Clear URL input field
-      setUrl('');
+
 
     } catch (err) {
       console.error('[Browser Download Error]:', err.message);
@@ -574,7 +574,7 @@ export default function Home() {
           </div>
           <div className="logo-item">
             <span className="logo-icon">✨</span>
-            <span>many more</span>
+            <span>and Many More</span>
           </div>
         </div>
       </section>
