@@ -34,21 +34,23 @@ def get_download_info(req: DownloadRequest):
         
     try:
         # Determine extraction options
+        base_opts = {
+            'quiet': True,
+            'no_warnings': True,
+            'nocheckcertificate': True,
+            'skip_download': True,
+            'extractor_args': {'youtube': ['client=android,ios,web']},
+        }
+        
         if format_type == 'mp3':
             ydl_opts = {
+                **base_opts,
                 'format': 'bestaudio/best',
-                'quiet': True,
-                'no_warnings': True,
-                'nocheckcertificate': True,
-                'skip_download': True,
             }
         else:
             ydl_opts = {
+                **base_opts,
                 'format': 'best[ext=mp4]/best',
-                'quiet': True,
-                'no_warnings': True,
-                'nocheckcertificate': True,
-                'skip_download': True,
             }
             
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:

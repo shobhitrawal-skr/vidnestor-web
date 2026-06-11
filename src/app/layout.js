@@ -11,9 +11,26 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport = {
+  themeColor: "#f7f7f7",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export const metadata = {
   title: "VidNestor Web | Social Media Downloader",
   description: "Fast, free, and premium social media downloader for YouTube, Instagram, TikTok, and Twitter. No login, no signup.",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    title: "VidNestor",
+    statusBarStyle: "default",
+  },
+  icons: {
+    apple: "/logo.png",
+  },
   openGraph: {
     title: "VidNestor Web | Social Media Downloader",
     description: "Fast, free, and premium social media downloader for YouTube, Instagram, TikTok, and Twitter. No login, no signup.",
