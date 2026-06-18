@@ -107,27 +107,26 @@ def get_download_info(req: DownloadRequest):
             
             # Formulate extractor arguments list (standard formatting for yt-dlp API)
             client_extractor_args = [f"client={client}"]
-            if po_token:
-                # Web-generated PO Tokens are client-specific. We only apply a web PO Token 
-                # to the web client, and other tokens to mobile clients, avoiding mismatch signature blocks.
-                is_web_token = "web" in po_token.lower()
-                if (is_web_token and client == 'web') or (not is_web_token and client != 'web'):
-                    if not po_token.startswith("po_token="):
-                        if is_web_token and not po_token.startswith("web.gvs+"):
-                            po_token_arg = f"po_token=web.gvs+{po_token}"
-                        else:
-                            po_token_arg = f"po_token={po_token}"
+            
+            # Browser-generated PO Tokens are specific to the web client. We only apply the 
+            # YOUTUBE_PO_TOKEN and YOUTUBE_VISITOR_DATA when attempting the 'web' client.
+            if client == 'web' and po_token:
+                if not po_token.startswith("po_token="):
+                    if not po_token.startswith("web.gvs+"):
+                        po_token_arg = f"po_token=web.gvs+{po_token}"
                     else:
-                        po_token_arg = po_token
-                    client_extractor_args.append(po_token_arg)
-                    
-                    # Apply matching visitor_data if available to complete the integrity verification session
-                    if visitor_data:
-                        if not visitor_data.startswith("visitor_data="):
-                            visitor_data_arg = f"visitor_data={visitor_data}"
-                        else:
-                            visitor_data_arg = visitor_data
-                        client_extractor_args.append(visitor_data_arg)
+                        po_token_arg = f"po_token={po_token}"
+                else:
+                    po_token_arg = po_token
+                client_extractor_args.append(po_token_arg)
+                
+                # Apply matching visitor_data if available to complete the integrity verification session
+                if visitor_data:
+                    if not visitor_data.startswith("visitor_data="):
+                        visitor_data_arg = f"visitor_data={visitor_data}"
+                    else:
+                        visitor_data_arg = visitor_data
+                    client_extractor_args.append(visitor_data_arg)
                 
             # Base options configured to maximize success on Vercel without external auth/cookies/proxies
             ydl_opts = {
