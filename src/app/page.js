@@ -10,6 +10,12 @@ export default function Home() {
   const [downloads, setDownloads] = useState([]);
   const [shareableFile, setShareableFile] = useState(null);
 
+  // PWA Install Prompt States
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallBtn, setShowInstallBtn] = useState(false);
+  const [showIosPrompt, setShowIosPrompt] = useState(false);
+  const [pwaDismissed, setPwaDismissed] = useState(false);
+
   // Playlist State
   const [playlist, setPlaylist] = useState(null); // { title: '', entries: [...] }
 
@@ -43,6 +49,33 @@ export default function Home() {
           .catch((err) => console.error('Service Worker registration failed:', err));
       });
     }
+
+    // PWA Install Prompts initialization
+    const dismissed = sessionStorage.getItem('vidnestor_pwa_dismissed');
+    if (dismissed) {
+      setPwaDismissed(true);
+    } else {
+      const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+
+      if (isIos && !isStandalone) {
+        setShowIosPrompt(true);
+      }
+    }
+
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      if (!sessionStorage.getItem('vidnestor_pwa_dismissed')) {
+        setShowInstallBtn(true);
+      }
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
 
   // Save downloads history to localStorage
@@ -328,6 +361,20 @@ export default function Home() {
         console.error('Failed to share file:', err);
       }
     }
+  };
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    console.log(`PWA install prompt outcome: ${outcome}`);
+    setDeferredPrompt(null);
+    setShowInstallBtn(false);
+  };
+
+  const handleDismissPwa = () => {
+    sessionStorage.setItem('vidnestor_pwa_dismissed', 'true');
+    setPwaDismissed(true);
   };
 
   return (
@@ -813,6 +860,35 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* PWA iOS Install Prompt Guide */}
+      {!pwaDismissed && showIosPrompt && (
+        <div className="pwa-prompt">
+          <div className="pwa-prompt-header">
+            <span className="pwa-prompt-title">Install VidNestor</span>
+            <button className="pwa-close-btn" onClick={handleDismissPwa}>✕</button>
+          </div>
+          <div className="pwa-prompt-body">
+            To install this app on your iPhone: tap the <strong>Share</strong> button <span style={{ fontSize: '1.2rem', verticalAlign: 'middle', lineHeight: '1' }}>⎋</span> and select <strong>"Add to Home Screen"</strong> <span style={{ fontSize: '1.2rem', verticalAlign: 'middle', lineHeight: '1' }}>⊞</span>.
+          </div>
+        </div>
+      )}
+
+      {/* PWA Android/Desktop Programmatic Install Button */}
+      {!pwaDismissed && showInstallBtn && (
+        <div className="pwa-prompt">
+          <div className="pwa-prompt-header">
+            <span className="pwa-prompt-title">Install App</span>
+            <button className="pwa-close-btn" onClick={handleDismissPwa}>✕</button>
+          </div>
+          <div className="pwa-prompt-body" style={{ marginBottom: '8px' }}>
+            Install VidNestor on your device for a fast, app-like experience.
+          </div>
+          <button className="pwa-install-btn" onClick={handleInstallClick}>
+            Install App
+          </button>
+        </div>
+      )}
     </div>
   );
 }

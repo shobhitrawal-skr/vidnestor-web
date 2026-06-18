@@ -493,6 +493,98 @@ html {
   transform: translateY(0.5px);
 }
 
+/* Floating PWA Install Prompt Banner */
+.pwa-prompt {
+  position: fixed;
+  bottom: var(--space-md);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  width: 90%;
+  max-width: 400px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(110, 86, 207, 0.15);
+  border-radius: var(--radius-card);
+  padding: var(--space-md);
+  box-shadow: 
+    0 4px 16px rgba(0, 0, 0, 0.04),
+    0 16px 40px rgba(110, 86, 207, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  animation: pwa-slide-up 0.4s var(--ease-out);
+}
+
+@keyframes pwa-slide-up {
+  from {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+}
+
+.pwa-prompt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pwa-prompt-title {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.pwa-close-btn {
+  background: transparent;
+  border: none;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  cursor: pointer;
+  padding: var(--space-3xs);
+  line-height: 1;
+  transition: color var(--dur-short) var(--ease-out);
+}
+
+.pwa-close-btn:hover {
+  color: var(--color-ink);
+}
+
+.pwa-prompt-body {
+  font-size: var(--text-xs);
+  color: var(--color-ink-2);
+  line-height: 1.5;
+}
+
+.pwa-install-btn {
+  background: var(--color-accent);
+  color: var(--color-accent-ink);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1.5px solid rgba(0, 0, 0, 0.18);
+  padding: 0.35rem 0.7rem;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  align-self: flex-start;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: background-color var(--dur-short) var(--ease-out), transform 100ms var(--ease-out);
+}
+
+.pwa-install-btn:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.pwa-install-btn:active {
+  transform: translateY(0.5px);
+}
+
 /* Compatibility Wall (T2 Logo Wall Hairline) */
 .compatibility-wall {
   margin-block: var(--space-xl);
