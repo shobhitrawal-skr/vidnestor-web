@@ -9,6 +9,8 @@ export default function Home() {
   const [status, setStatus] = useState(null); // { type: 'success'|'error'|'info', text: '' }
   const [downloads, setDownloads] = useState([]);
   const [shareableFile, setShareableFile] = useState(null);
+  const [downloadUrl, setDownloadUrl] = useState(null);
+  const [downloadFilename, setDownloadFilename] = useState(null);
 
   // PWA Install Prompt States
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -129,6 +131,8 @@ export default function Home() {
     setFallbackLink(null);
     setFallbackFilename(null);
     setShareableFile(null);
+    setDownloadUrl(null);
+    setDownloadFilename(null);
 
     const CHUNK_SIZE = 1.5 * 1024 * 1024; // 1.5MB chunks to prevent Vercel serverless timeouts
     let downloadedBytes = 0;
@@ -216,8 +220,16 @@ export default function Home() {
       const fileBlob = new Blob(chunks, { type: mimeType });
       const localUrl = URL.createObjectURL(fileBlob);
 
-      // Detect standalone PWA mode
+      // Create a Blob with application/octet-stream for direct, clean download in iOS Safari/PWA (prevents popups/previews)
+      const octetBlob = new Blob(chunks, { type: 'application/octet-stream' });
+      const cleanDownloadUrl = URL.createObjectURL(octetBlob);
+
+      setDownloadUrl(cleanDownloadUrl);
+      setDownloadFilename(filename);
+
+      // Detect standalone PWA mode and mobile devices
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
       
       let fileObj = null;
       try {
@@ -228,23 +240,33 @@ export default function Home() {
 
       const canShare = fileObj && navigator.canShare && navigator.canShare({ files: [fileObj] });
 
-      // If the browser supports native sharing (Web Share API), we skip the automatic anchor link click.
-      // This completely prevents the browser (and the installed PWA) from showing the native, intrusive "download complete" / blob viewer pop-ups.
-      // Instead, the user simply clicks the "Save to Photos / Share" button, which opens the native share sheet directly.
-      if (canShare) {
-        setShareableFile(fileObj);
+      // If the browser is mobile or running as an installed PWA (standalone), we DO NOT
+      // trigger the automatic click. This prevents Safari/Chrome on iOS/Android from opening
+      // a blank page or video player popup showing the filename that the user has to manually close.
+      // Instead, we show clean manual share/save buttons in the completion UI.
+      if (isMobile || isStandalone) {
+        if (canShare) {
+          setShareableFile(fileObj);
+        }
       } else {
-        // Auto-trigger browser download save dialog for browsers that don't support file sharing (e.g. desktop Chrome)
+        // Auto-trigger browser download save dialog for desktop browsers
         const tempLink = document.createElement('a');
         tempLink.href = localUrl;
         tempLink.setAttribute('download', filename);
         document.body.appendChild(tempLink);
         tempLink.click();
         document.body.removeChild(tempLink);
+        
+        if (canShare) {
+          setShareableFile(fileObj);
+        }
       }
 
-      // Cleanup Object URL to release browser memory
-      setTimeout(() => URL.revokeObjectURL(localUrl), 10000);
+      // Cleanup Object URLs to release browser memory after 30 seconds to allow manual clicks
+      setTimeout(() => {
+        URL.revokeObjectURL(localUrl);
+        URL.revokeObjectURL(cleanDownloadUrl);
+      }, 30000);
 
       // Add to session downloads history
       const cleanSourceUrl = sourceUrl.replace(/https?:\/\/(www\.)?/, '').slice(0, 30) + '...';
@@ -564,14 +586,37 @@ export default function Home() {
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1, alignItems: 'flex-start' }}>
                 <span style={{ lineHeight: '1.4' }}>{status.text}</span>
-                {status.type === 'success' && shareableFile && (
-                  <button
-                    type="button"
-                    onClick={handleShare}
-                    className="share-btn"
-                  >
-                    📱 Save to Photos / Share
-                  </button>
+                {status.type === 'success' && (shareableFile || downloadUrl) && (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', width: '100%', marginTop: '4px' }}>
+                    {shareableFile && (
+                      <button
+                        type="button"
+                        onClick={handleShare}
+                        className="share-btn"
+                        style={{ flex: '1 1 auto' }}
+                      >
+                        📱 Save to Photos / Share
+                      </button>
+                    )}
+                    {downloadUrl && (
+                      <a
+                        href={downloadUrl}
+                        download={downloadFilename || "video.mp4"}
+                        className="share-btn"
+                        style={{
+                          flex: '1 1 auto',
+                          textDecoration: 'none',
+                          textAlign: 'center',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          backgroundColor: 'var(--color-accent-2)'
+                        }}
+                      >
+                        📥 Save to Files
+                      </a>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
