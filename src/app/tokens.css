@@ -1,20 +1,21 @@
 :root {
-  /* Warm-Light Theme Palette (OKLCH) */
-  --color-paper: oklch(97% 0.012 80);
-  --color-paper-2: oklch(94% 0.015 80);
-  --color-paper-3: oklch(91% 0.018 80);
-  --color-ink: oklch(20% 0.012 60);
-  --color-ink-2: oklch(36% 0.012 60);
-  --color-muted: oklch(56% 0.010 60);
-  --color-rule: oklch(86% 0.010 80);
-  --color-rule-2: oklch(76% 0.012 80);
-  --color-accent: oklch(60% 0.16 35);
-  --color-accent-hover: oklch(54% 0.15 35);
-  --color-accent-active: oklch(48% 0.14 35);
-  --color-accent-2: oklch(64% 0.14 200);
-  --color-accent-ink: oklch(97% 0.012 80);
-  --color-focus: oklch(62% 0.20 35);
-  --color-blueprint: oklch(20% 0.012 60 / 0.035);
+  /* Modernized Light Theme Palette */
+  --color-paper: #F8F6F1;
+  --color-paper-2: #FFFFFF;
+  --color-paper-3: #F1EEE7;
+  --color-ink: #1A1917;
+  --color-ink-2: #4C4842;
+  --color-muted: #858076;
+  --color-rule: #EAE6DD;
+  --color-rule-2: #D3CDC2;
+  --color-accent: #6E56CF;
+  --color-accent-hover: #5B43C3;
+  --color-accent-active: #4A32A5;
+  --color-accent-2: #4F8CFF;
+  --color-accent-success: #00B894;
+  --color-accent-ink: #FFFFFF;
+  --color-focus: rgba(110, 86, 207, 0.15);
+  --color-blueprint: rgba(110, 86, 207, 0.05);
 
   /* Typography */
   --font-display: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;

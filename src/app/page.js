@@ -8,6 +8,7 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState(null); // { type: 'success'|'error'|'info', text: '' }
   const [downloads, setDownloads] = useState([]);
+  const [shareableFile, setShareableFile] = useState(null);
 
   // Playlist State
   const [playlist, setPlaylist] = useState(null); // { title: '', entries: [...] }
@@ -23,7 +24,7 @@ export default function Home() {
   const [fallbackLink, setFallbackLink] = useState(null);
   const [fallbackFilename, setFallbackFilename] = useState(null);
 
-  // Load downloads history from localStorage
+  // Load downloads history from localStorage and register PWA service worker
   useEffect(() => {
     try {
       const saved = localStorage.getItem('vidnestor_web_downloads');
@@ -32,6 +33,15 @@ export default function Home() {
       }
     } catch (e) {
       console.error('Failed to load downloads history:', e);
+    }
+
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then((reg) => console.log('Service Worker registered successfully with scope:', reg.scope))
+          .catch((err) => console.error('Service Worker registration failed:', err));
+      });
     }
   }, []);
 
@@ -85,6 +95,7 @@ export default function Home() {
     setDownloadSizeInfo('0 MB / 0 MB');
     setFallbackLink(null);
     setFallbackFilename(null);
+    setShareableFile(null);
 
     const CHUNK_SIZE = 1.5 * 1024 * 1024; // 1.5MB chunks to prevent Vercel serverless timeouts
     let downloadedBytes = 0;
@@ -168,7 +179,8 @@ export default function Home() {
       }
 
       // Stitch all byte chunks together
-      const fileBlob = new Blob(chunks, { type: 'application/octet-stream' });
+      const mimeType = selectedFormat === 'mp3' ? 'audio/mpeg' : 'video/mp4';
+      const fileBlob = new Blob(chunks, { type: mimeType });
       const localUrl = URL.createObjectURL(fileBlob);
 
       // Auto-trigger browser download save dialog
@@ -181,6 +193,16 @@ export default function Home() {
 
       // Cleanup Object URL to release browser memory
       setTimeout(() => URL.revokeObjectURL(localUrl), 10000);
+
+      // Prepare native share payload (mainly for mobile Safari/Chrome to Save to Photos)
+      try {
+        const file = new File([fileBlob], filename, { type: mimeType });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          setShareableFile(file);
+        }
+      } catch (shareErr) {
+        console.warn('Failed to construct shareable file:', shareErr);
+      }
 
       // Add to session downloads history
       const cleanSourceUrl = sourceUrl.replace(/https?:\/\/(www\.)?/, '').slice(0, 30) + '...';
@@ -291,6 +313,21 @@ export default function Home() {
 
   const clearHistory = () => {
     saveDownloads([]);
+  };
+
+  const handleShare = async () => {
+    if (!shareableFile) return;
+    try {
+      await navigator.share({
+        files: [shareableFile],
+        title: 'Save Video',
+        text: 'Save downloaded media to your device'
+      });
+    } catch (err) {
+      if (err.name !== 'AbortError') {
+        console.error('Failed to share file:', err);
+      }
+    }
   };
 
   return (
@@ -465,9 +502,22 @@ export default function Home() {
 
           {/* Status Message */}
           {status && (
-            <div className={`status-msg ${status.type}`}>
-              <span>{status.type === 'error' ? '❌' : status.type === 'success' ? '✅' : '🔄'}</span>
-              <span>{status.text}</span>
+            <div className={`status-msg ${status.type}`} style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-xs)', width: '100%' }}>
+              <span style={{ fontSize: '1.2rem', flexShrink: 0 }}>
+                {status.type === 'error' ? '❌' : status.type === 'success' ? '✅' : '🔄'}
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1, alignItems: 'flex-start' }}>
+                <span style={{ lineHeight: '1.4' }}>{status.text}</span>
+                {status.type === 'success' && shareableFile && (
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="share-btn"
+                  >
+                    📱 Save to Photos / Share
+                  </button>
+                )}
+              </div>
             </div>
           )}
 

@@ -4,8 +4,8 @@
   "description": "High-speed, ad-free social media downloader.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#f7f7f7",
+  "background_color": "#F8F6F1",
+  "theme_color": "#F8F6F1",
   "icons": [
     {
       "src": "/logo.png",
