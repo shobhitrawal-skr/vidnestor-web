@@ -228,23 +228,19 @@ export default function Home() {
 
       const canShare = fileObj && navigator.canShare && navigator.canShare({ files: [fileObj] });
 
-      // If running as an installed PWA and sharing is supported, skip triggering the anchor click.
-      // In PWA mode, browser blob navigation triggers an unwanted, empty viewer pop-up that forces the user to manually close it.
-      // Instead, we directly offer the "Save to Photos / Share" button to save it without any pop-up interruptions.
-      if (isStandalone && canShare) {
+      // If the browser supports native sharing (Web Share API), we skip the automatic anchor link click.
+      // This completely prevents the browser (and the installed PWA) from showing the native, intrusive "download complete" / blob viewer pop-ups.
+      // Instead, the user simply clicks the "Save to Photos / Share" button, which opens the native share sheet directly.
+      if (canShare) {
         setShareableFile(fileObj);
       } else {
-        // Auto-trigger browser download save dialog for normal browser mode
+        // Auto-trigger browser download save dialog for browsers that don't support file sharing (e.g. desktop Chrome)
         const tempLink = document.createElement('a');
         tempLink.href = localUrl;
         tempLink.setAttribute('download', filename);
         document.body.appendChild(tempLink);
         tempLink.click();
         document.body.removeChild(tempLink);
-
-        if (canShare) {
-          setShareableFile(fileObj);
-        }
       }
 
       // Cleanup Object URL to release browser memory
