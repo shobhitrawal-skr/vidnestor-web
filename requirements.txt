@@ -1,4 +1,4 @@
 fastapi>=0.117.1
 uvicorn>=0.30.0
-yt-dlp>=2026.06.09
+yt-dlp @ https://github.com/yt-dlp/yt-dlp/archive/master.tar.gz
 requests>=2.31.0
