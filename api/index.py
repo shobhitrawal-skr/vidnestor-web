@@ -105,28 +105,33 @@ def get_download_info(req: DownloadRequest):
             client_start_time = time.time()
             logger.info(f"Attempting metadata extraction with client '{client}' for video ID '{video_id}'")
             
-            # Formulate extractor arguments list (standard formatting for yt-dlp API)
-            client_extractor_args = [f"client={client}"]
+            # Formulate extractor arguments dictionary (standard formatting for yt-dlp Python API)
+            client_extractor_args = {
+                'client': [client]
+            }
             
             # Browser-generated PO Tokens are specific to the web client. We only apply the 
             # YOUTUBE_PO_TOKEN and YOUTUBE_VISITOR_DATA when attempting the 'web' client.
             if client == 'web' and po_token:
-                if not po_token.startswith("po_token="):
-                    if not po_token.startswith("web.gvs+"):
-                        po_token_arg = f"po_token=web.gvs+{po_token}"
-                    else:
-                        po_token_arg = f"po_token={po_token}"
+                # Clean prefix from the token value if present
+                if po_token.startswith("po_token="):
+                    po_token_val = po_token.replace("po_token=", "", 1)
                 else:
-                    po_token_arg = po_token
-                client_extractor_args.append(po_token_arg)
+                    po_token_val = po_token
+                
+                # Ensure the web.gvs+ prefix is present for the web client
+                if not po_token_val.startswith("web.gvs+"):
+                    po_token_val = f"web.gvs+{po_token_val}"
+                    
+                client_extractor_args['po_token'] = [po_token_val]
                 
                 # Apply matching visitor_data if available to complete the integrity verification session
                 if visitor_data:
-                    if not visitor_data.startswith("visitor_data="):
-                        visitor_data_arg = f"visitor_data={visitor_data}"
+                    if visitor_data.startswith("visitor_data="):
+                        visitor_data_val = visitor_data.replace("visitor_data=", "", 1)
                     else:
-                        visitor_data_arg = visitor_data
-                    client_extractor_args.append(visitor_data_arg)
+                        visitor_data_val = visitor_data
+                    client_extractor_args['visitor_data'] = [visitor_data_val]
                 
             # Base options configured to maximize success on Vercel without external auth/cookies/proxies
             ydl_opts = {
