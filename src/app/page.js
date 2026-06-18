@@ -216,26 +216,39 @@ export default function Home() {
       const fileBlob = new Blob(chunks, { type: mimeType });
       const localUrl = URL.createObjectURL(fileBlob);
 
-      // Auto-trigger browser download save dialog
-      const tempLink = document.createElement('a');
-      tempLink.href = localUrl;
-      tempLink.setAttribute('download', filename);
-      document.body.appendChild(tempLink);
-      tempLink.click();
-      document.body.removeChild(tempLink);
+      // Detect standalone PWA mode
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+      
+      let fileObj = null;
+      try {
+        fileObj = new File([fileBlob], filename, { type: mimeType });
+      } catch (fErr) {
+        console.warn('Failed to create file object:', fErr);
+      }
+
+      const canShare = fileObj && navigator.canShare && navigator.canShare({ files: [fileObj] });
+
+      // If running as an installed PWA and sharing is supported, skip triggering the anchor click.
+      // In PWA mode, browser blob navigation triggers an unwanted, empty viewer pop-up that forces the user to manually close it.
+      // Instead, we directly offer the "Save to Photos / Share" button to save it without any pop-up interruptions.
+      if (isStandalone && canShare) {
+        setShareableFile(fileObj);
+      } else {
+        // Auto-trigger browser download save dialog for normal browser mode
+        const tempLink = document.createElement('a');
+        tempLink.href = localUrl;
+        tempLink.setAttribute('download', filename);
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        document.body.removeChild(tempLink);
+
+        if (canShare) {
+          setShareableFile(fileObj);
+        }
+      }
 
       // Cleanup Object URL to release browser memory
       setTimeout(() => URL.revokeObjectURL(localUrl), 10000);
-
-      // Prepare native share payload (mainly for mobile Safari/Chrome to Save to Photos)
-      try {
-        const file = new File([fileBlob], filename, { type: mimeType });
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          setShareableFile(file);
-        }
-      } catch (shareErr) {
-        console.warn('Failed to construct shareable file:', shareErr);
-      }
 
       // Add to session downloads history
       const cleanSourceUrl = sourceUrl.replace(/https?:\/\/(www\.)?/, '').slice(0, 30) + '...';
