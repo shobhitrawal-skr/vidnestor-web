@@ -227,9 +227,12 @@ export default function Home() {
       setDownloadUrl(cleanDownloadUrl);
       setDownloadFilename(filename);
 
-      // Detect standalone PWA mode and mobile devices
+      // Detect standalone PWA mode, mobile/touch devices, and Safari
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
+                       (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) ||
+                       (typeof window !== 'undefined' && 'ontouchstart' in window);
+      const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
       
       let fileObj = null;
       try {
@@ -240,11 +243,11 @@ export default function Home() {
 
       const canShare = fileObj && navigator.canShare && navigator.canShare({ files: [fileObj] });
 
-      // If the browser is mobile or running as an installed PWA (standalone), we DO NOT
+      // If the browser is mobile, Safari, or running as an installed PWA (standalone), we DO NOT
       // trigger the automatic click. This prevents Safari/Chrome on iOS/Android from opening
       // a blank page or video player popup showing the filename that the user has to manually close.
       // Instead, we show clean manual share/save buttons in the completion UI.
-      if (isMobile || isStandalone) {
+      if (isMobile || isStandalone || isSafari) {
         if (canShare) {
           setShareableFile(fileObj);
         }
