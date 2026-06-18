@@ -90,6 +90,7 @@ def get_download_info(req: DownloadRequest):
 
     # Set up environment helper values
     po_token = os.environ.get("YOUTUBE_PO_TOKEN")
+    visitor_data = os.environ.get("YOUTUBE_VISITOR_DATA")
     proxy = os.environ.get("YOUTUBE_PROXY")
 
     # We sequentially fallback across multiple client types:
@@ -119,6 +120,14 @@ def get_download_info(req: DownloadRequest):
                     else:
                         po_token_arg = po_token
                     client_extractor_args.append(po_token_arg)
+                    
+                    # Apply matching visitor_data if available to complete the integrity verification session
+                    if visitor_data:
+                        if not visitor_data.startswith("visitor_data="):
+                            visitor_data_arg = f"visitor_data={visitor_data}"
+                        else:
+                            visitor_data_arg = visitor_data
+                        client_extractor_args.append(visitor_data_arg)
                 
             # Base options configured to maximize success on Vercel without external auth/cookies/proxies
             ydl_opts = {
