@@ -58,6 +58,7 @@ def get_download_info(req: DownloadRequest):
     video_id = "unknown"
     successful_client = None
     last_exception = None
+    client_errors = {}
     info = None
     
     # Try to pre-extract video ID from standard YouTube URL formats for logging context.
@@ -194,13 +195,17 @@ def get_download_info(req: DownloadRequest):
             except Exception as e:
                 duration = time.time() - client_start_time
                 last_exception = e
+                # Get the first line of the error message to keep it readable
+                err_clean = str(e).split('\n')[0]
+                client_errors[client] = err_clean
                 logger.warning(f"Extraction FAILED with client '{client}' for video ID '{video_id}' in {duration:.2f} seconds. Error: {str(e)}")
                 # Continue loop to fallback on next client
 
         if not successful_client:
             total_duration = time.time() - start_time
             err_msg = str(last_exception) or "Unknown extraction failure"
-            logger.error(f"All player clients failed. Total duration: {total_duration:.2f} seconds. Last error: {err_msg}")
+            details = "; ".join([f"{k}: {v}" for k, v in client_errors.items()])
+            logger.error(f"All player clients failed. Total duration: {total_duration:.2f} seconds. Errors: {details}")
             
             # Print full trace internally for debug auditing
             logger.error(f"Internal traceback:\n{traceback.format_exc()}")
@@ -220,16 +225,16 @@ def get_download_info(req: DownloadRequest):
             if any(kw in err_msg.lower() for kw in bot_keywords):
                 user_error = (
                     "YouTube has temporarily rate-limited or blocked this request. "
-                    "Please wait a few moments and try again, or try another format."
+                    f"Please try again or try another format. (Details: {details})"
                 )
                 return JSONResponse(status_code=403, content={"success": False, "error": user_error})
             
             # Check for invalid URL or private video errors
             invalid_keywords = ["not a valid url", "invalid url", "private video", "video unavailable", "does not exist"]
             if any(kw in err_msg.lower() for kw in invalid_keywords):
-                user_error = "The video is private, unavailable, or the URL is invalid."
+                user_error = f"The video is private, unavailable, or the URL is invalid. (Details: {details})"
             else:
-                user_error = "Failed to extract video details. YouTube may be rate-limiting this request."
+                user_error = f"Failed to extract video details. (Details: {details})"
                 
             return JSONResponse(status_code=400, content={"success": False, "error": user_error})
 
