@@ -36,6 +36,9 @@ export default function Home() {
   const [detectedPlatform, setDetectedPlatform] = useState(null);
   const [isYoutubeBlocked, setIsYoutubeBlocked] = useState(false);
 
+  // Mobile detection state
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
   // Platform detection hook
   useEffect(() => {
     if (!url) {
@@ -76,6 +79,11 @@ export default function Home() {
 
   // Load downloads history from localStorage and register PWA service worker
   useEffect(() => {
+    const mobileCheck = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent) || 
+                        (navigator.maxTouchPoints && navigator.maxTouchPoints > 0) ||
+                        (typeof window !== 'undefined' && 'ontouchstart' in window);
+    setIsMobileDevice(mobileCheck);
+
     try {
       const saved = localStorage.getItem('vidnestor_web_downloads');
       if (saved) {
@@ -679,7 +687,7 @@ export default function Home() {
               </span>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flexGrow: 1, alignItems: 'flex-start' }}>
                 <span style={{ lineHeight: '1.4' }}>{status.text}</span>
-                {status.type === 'success' && (shareableFile || downloadUrl) && (
+                {isMobileDevice && status.type === 'success' && (shareableFile || downloadUrl) && (
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', width: '100%', marginTop: '4px' }}>
                     {shareableFile && (
                       <button
