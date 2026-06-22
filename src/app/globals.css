@@ -603,7 +603,7 @@ html {
 
 .logo-grid {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   gap: 1px;
   background-color: var(--color-rule);
   border: 1px solid var(--color-rule);
@@ -629,12 +629,52 @@ html {
 
 .logo-item:hover {
   background-color: var(--color-paper-3);
-  color: var(--color-accent);
 }
 
 .logo-icon {
-  font-size: var(--text-md);
-  margin-bottom: 2px;
+  width: 24px;
+  height: 24px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+  transition: transform var(--dur-short) var(--ease-out);
+}
+
+.logo-item:hover .logo-icon svg {
+  transform: scale(1.15);
+}
+
+/* Brand colors (permanent) */
+.logo-item.instagram {
+  color: #e1306c;
+}
+.logo-item.tiktok {
+  color: #000000;
+}
+.logo-item.twitter {
+  color: #000000;
+}
+.logo-item.pinterest {
+  color: #bd081c;
+}
+.logo-item.facebook {
+  color: #1877f2;
+}
+.logo-item.reddit {
+  color: #ff4500;
+}
+.logo-item.vimeo {
+  color: #1ab7ea;
+}
+.logo-item.more {
+  color: #f59e0b;
 }
 
 /* Features Grid (F1 Bento Grid) */
@@ -1266,7 +1306,7 @@ input:focus-visible {
   }
   
   .logo-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 
   .features-grid {
@@ -1279,6 +1319,10 @@ input:focus-visible {
 }
 
 @media (max-width: 40rem) {
+  .logo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
   .page-wrapper {
     padding-top: 120px;
     padding-bottom: var(--space-xl);

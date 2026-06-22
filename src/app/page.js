@@ -804,42 +804,71 @@ export default function Home() {
 
       {/* Supported Platforms Section */}
       <section className="section-container compatibility-wall" id="platforms">
-        <h2 className="section-title-centered">Supported Platforms</h2>
-        <div className="platform-card-grid">
-          <div className="platform-card">
-            <span className="platform-card-icon">📸</span>
-            <h3 className="platform-card-name">Instagram</h3>
-            <p className="platform-card-desc">Reels, videos, and post photos</p>
+        <h2 className="compatibility-label">Supported Social Networks</h2>
+        <div className="logo-grid">
+          <div className="logo-item instagram">
+            <span className="logo-icon">
+              <svg viewBox="0 0 24 24" className="brand-svg">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z" />
+              </svg>
+            </span>
+            <span className="logo-text">Instagram</span>
           </div>
-          <div className="platform-card">
-            <span className="platform-card-icon">🎵</span>
-            <h3 className="platform-card-name">TikTok</h3>
-            <p className="platform-card-desc">High-quality video downloads</p>
+          <div className="logo-item tiktok">
+            <span className="logo-icon">
+              <svg viewBox="0 0 24 24" className="brand-svg">
+                <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.06-2.89-.52-4.06-1.39-.77-.57-1.39-1.34-1.81-2.23-.08 2.89-.02 5.79-.04 8.68-.06 2.37-.9 4.82-2.73 6.36-1.92 1.67-4.7 2.19-7.14 1.41-2.9-1.01-4.93-3.99-4.83-7.07.05-3.52 2.92-6.66 6.44-6.86.83-.06 1.67.08 2.47.37V9.01c-.96-.44-2.04-.54-3.08-.29-2.07.45-3.55 2.51-3.28 4.62.24 1.79 1.76 3.19 3.56 3.15 1.72-.05 3.07-1.45 3.13-3.17.03-4.32-.01-8.64-.01-12.96-.06-.11-.13-.24-.15-.37z" />
+              </svg>
+            </span>
+            <span className="logo-text">TikTok</span>
           </div>
-          <div className="platform-card">
-            <span className="platform-card-icon">📘</span>
-            <h3 className="platform-card-name">Facebook</h3>
-            <p className="platform-card-desc">Public videos and post clips</p>
+          <div className="logo-item twitter">
+            <span className="logo-icon">
+              <svg viewBox="0 0 24 24" className="brand-svg">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            </span>
+            <span className="logo-text">Twitter / X</span>
           </div>
-          <div className="platform-card">
-            <span className="platform-card-icon">🐦</span>
-            <h3 className="platform-card-name">X (Twitter)</h3>
-            <p className="platform-card-desc">Save shared videos and GIF clips</p>
+          <div className="logo-item pinterest">
+            <span className="logo-icon">
+              <svg viewBox="0 0 24 24" className="brand-svg">
+                <path d="M12 0C5.373 0 0 5.372 0 12c0 5.084 3.163 9.426 7.627 11.174-.105-.949-.2-2.405.042-3.441.218-.937 1.407-5.965 1.407-5.965s-.359-.719-.359-1.782c0-1.668.967-2.914 2.171-2.914 1.023 0 1.518.769 1.518 1.69 0 1.029-.655 2.568-.994 3.995-.283 1.194.599 2.169 1.777 2.169 2.133 0 3.772-2.249 3.772-5.495 0-2.873-2.064-4.882-5.012-4.882-3.414 0-5.418 2.561-5.418 5.204 0 1.031.397 2.138.893 2.738.098.119.112.224.083.345l-.333 1.36c-.053.22-.174.267-.402.161-1.499-.698-2.436-2.889-2.436-4.649 0-3.785 2.75-7.262 7.929-7.262 4.162 0 7.397 2.967 7.397 6.93 0 4.136-2.607 7.464-6.227 7.464-1.216 0-2.359-.631-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24 12 24c6.627 0 12-5.373 12-12 0-6.628-5.373-12-12-12z" />
+              </svg>
+            </span>
+            <span className="logo-text">Pinterest</span>
           </div>
-          <div className="platform-card">
-            <span className="platform-card-icon">📌</span>
-            <h3 className="platform-card-name">Pinterest</h3>
-            <p className="platform-card-desc">Video pins and ideas</p>
+          <div className="logo-item facebook">
+            <span className="logo-icon">
+              <svg viewBox="0 0 24 24" className="brand-svg">
+                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+              </svg>
+            </span>
+            <span className="logo-text">Facebook</span>
           </div>
-          <div className="platform-card">
-            <span className="platform-card-icon">🤖</span>
-            <h3 className="platform-card-name">Reddit</h3>
-            <p className="platform-card-desc">Video downloads with audio merged</p>
+          <div className="logo-item reddit">
+            <span className="logo-icon">
+              <svg viewBox="0 0 24 24" className="brand-svg">
+                <path d="M24 11.5c0-1.65-1.35-3-3-3-.96 0-1.86.48-2.42 1.24-1.64-1-3.85-1.64-6.29-1.72l1.3-4.14 4.23 1c.04 1.11.96 2 2.08 2 1.15 0 2.1-0.95 2.1-2.1s-0.95-2.1-2.1-2.1c-1.03 0-1.89.75-2.05 1.74l-4.75-1.12c-0.22-0.05-0.45.08-0.51.3l-1.56 5c-2.47.05-4.72.7-6.38 1.72-0.56-.76-1.46-1.24-2.42-1.24-1.65 0-3 1.35-3 3 0 1.05.54 1.97 1.37 2.51-.06.33-.09.66-.09 1 0 3.86 4.49 7 10 7s10-3.14 10-7c0-.34-.03-.67-.09-1 .83-.54 1.37-1.46 1.37-2.51zM5.5 13.5c0-1.1.9-2 2-2s2 .9 2 2-0.9 2-2 2-2-.9-2-2zM17 17.5c-1.83 1.83-5.17 1.83-7 0-0.2-.2-0.2-0.51 0-0.71.2-.2.51-.2.71 0 1.44 1.44 4.14 1.44 5.58 0 .2-.2.51-.2.71 0 .2.2.2.51 0 .71zM14.5 15.5c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-0.9 2-2 2z" />
+              </svg>
+            </span>
+            <span className="logo-text">Reddit</span>
           </div>
-          <div className="platform-card">
-            <span className="platform-card-icon">🎥</span>
-            <h3 className="platform-card-name">Vimeo</h3>
-            <p className="platform-card-desc">VOD clips and portfolio videos</p>
+          <div className="logo-item vimeo">
+            <span className="logo-icon">
+              <svg viewBox="0 0 24 24" className="brand-svg">
+                <path d="M22.396 7.111c-.088 1.962-1.466 4.646-4.135 8.054-2.767 3.551-5.109 5.326-7.026 5.326-1.196 0-2.203-1.102-3.023-3.307-.549-2.022-1.099-4.043-1.649-6.065-.609-2.24-1.267-3.36-1.977-3.36-.153 0-.687.324-1.603.974l-.959-1.222c.983-.86 1.956-1.728 2.922-2.601 1.36-1.196 2.378-1.833 3.056-1.91 1.583-.178 2.56.908 2.934 3.256.406 2.544.69 4.12.854 4.73.418 1.691.878 2.536 1.383 2.536.395 0 1.01-.648 1.844-1.94 1.031-1.625 1.59-2.66 1.678-3.111.176-.845-.109-1.267-.856-1.267-.35 0-.791.077-1.328.23 1.153-3.771 3.355-5.59 6.608-5.456 2.404.103 3.513 1.67 3.327 4.703z" />
+              </svg>
+            </span>
+            <span className="logo-text">Vimeo</span>
+          </div>
+          <div className="logo-item more">
+            <span className="logo-icon">
+              <svg viewBox="0 0 24 24" className="brand-svg">
+                <path d="M12 2l1.62 5.26L19 9l-5.38 1.38L12 16l-1.62-5.62L5 9l5.38-1.74L12 2zm7 12l.94 3.06L23 18l-3.06.94L19 22l-.94-3.06L15 18l3.06-.94L19 14zM6 13l.63 2.06L9 16l-2.31.63L6 19l-.63-2.37L3 16l2.37-.63L6 13z" />
+              </svg>
+            </span>
+            <span className="logo-text">and Many More</span>
           </div>
         </div>
       </section>
