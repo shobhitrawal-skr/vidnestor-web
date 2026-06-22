@@ -32,6 +32,48 @@ export default function Home() {
   const [fallbackLink, setFallbackLink] = useState(null);
   const [fallbackFilename, setFallbackFilename] = useState(null);
 
+  // Platform Detection and YouTube block state
+  const [detectedPlatform, setDetectedPlatform] = useState(null);
+  const [isYoutubeBlocked, setIsYoutubeBlocked] = useState(false);
+
+  // Platform detection hook
+  useEffect(() => {
+    if (!url) {
+      setDetectedPlatform(null);
+      setIsYoutubeBlocked(false);
+      return;
+    }
+
+    const lowerUrl = url.toLowerCase();
+    
+    // Check YouTube first
+    if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be') || lowerUrl.includes('youtube-nocookie.com')) {
+      setDetectedPlatform('youtube');
+      setIsYoutubeBlocked(true);
+      return;
+    }
+    
+    setIsYoutubeBlocked(false);
+
+    if (lowerUrl.includes('instagram.com')) {
+      setDetectedPlatform('instagram');
+    } else if (lowerUrl.includes('tiktok.com')) {
+      setDetectedPlatform('tiktok');
+    } else if (lowerUrl.includes('facebook.com') || lowerUrl.includes('fb.watch') || lowerUrl.includes('fb.com')) {
+      setDetectedPlatform('facebook');
+    } else if (lowerUrl.includes('twitter.com') || lowerUrl.includes('x.com')) {
+      setDetectedPlatform('x');
+    } else if (lowerUrl.includes('pinterest.com') || lowerUrl.includes('pin.it')) {
+      setDetectedPlatform('pinterest');
+    } else if (lowerUrl.includes('reddit.com') || lowerUrl.includes('redd.it')) {
+      setDetectedPlatform('reddit');
+    } else if (lowerUrl.includes('vimeo.com')) {
+      setDetectedPlatform('vimeo');
+    } else {
+      setDetectedPlatform('unknown');
+    }
+  }, [url]);
+
   // Load downloads history from localStorage and register PWA service worker
   useEffect(() => {
     try {
@@ -305,6 +347,23 @@ export default function Home() {
     e.preventDefault();
     if (!url) return;
 
+    // Platform validation checks
+    if (isYoutubeBlocked) {
+      setStatus({
+        type: 'error',
+        text: 'YouTube downloads are currently not supported.'
+      });
+      return;
+    }
+
+    if (detectedPlatform === 'unknown') {
+      setStatus({
+        type: 'error',
+        text: 'This platform is not currently supported.'
+      });
+      return;
+    }
+
     setLoading(true);
     setPlaylist(null);
     setFallbackLink(null);
@@ -339,9 +398,21 @@ export default function Home() {
       }
     } catch (err) {
       console.error('[Download Error]:', err.message);
+      
+      let userFriendlyMsg = 'Failed to extract download link. Please check the URL and try again.';
+      const lowerErr = err.message.toLowerCase();
+      
+      if (lowerErr.includes('not supported') || lowerErr.includes('unsupported')) {
+        userFriendlyMsg = 'This platform is not currently supported.';
+      } else if (lowerErr.includes('rate-limited') || lowerErr.includes('blocked') || lowerErr.includes('bot') || lowerErr.includes('confirm you\'re not a bot')) {
+        userFriendlyMsg = 'The download service is temporarily busy. Please try again in a few moments.';
+      } else if (lowerErr.includes('private') || lowerErr.includes('unavailable') || lowerErr.includes('invalid') || lowerErr.includes('does not exist')) {
+        userFriendlyMsg = 'The post or video is private, unavailable, or the URL is invalid.';
+      }
+      
       setStatus({
         type: 'error',
-        text: `Error: ${err.message}. Please verify the URL and try again.`
+        text: userFriendlyMsg
       });
     } finally {
       setLoading(false);
@@ -437,10 +508,10 @@ export default function Home() {
             <span>VidNestor Engine v2.0</span>
           </div>
           <h1 className="hero-title">
-            Download social media videos instantly.
+            Download videos from social platforms
           </h1>
           <p className="hero-lede">
-            VidNestor provides high-speed direct downloads for YouTube, Instagram, TikTok, Twitter/X, and more. Completely free, no registration required, zero ads.
+            Fast, free downloads from Instagram, TikTok, Facebook, X, Pinterest, Reddit and more. No signup required.
           </p>
           <div className="hero-bullets">
             <div className="hero-bullet">
@@ -463,23 +534,42 @@ export default function Home() {
           <form onSubmit={handleDownload}>
             {/* URL Input */}
             <div className="form-group">
-              <label className="label">Enter Video or Playlist URL</label>
+              <label className="label">Enter Video URL</label>
               <div className="input-wrapper">
                 <span className="input-icon">🔗</span>
                 <input
                   type="url"
                   required
-                  placeholder="Paste YouTube, Instagram, TikTok, or Twitter link..."
+                  placeholder="Paste Instagram, TikTok, Facebook, X, or Pinterest link..."
                   className="url-input"
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                   disabled={loading || isDownloading}
                 />
               </div>
+              
+              {/* Platform indicators directly below input */}
+              <div className="supported-platforms-indicator">
+                Instagram • TikTok • Facebook • X • Pinterest • Reddit • Vimeo
+              </div>
+
+              {/* Dynamic Platform Detection Feedback */}
+              {detectedPlatform && detectedPlatform !== 'unknown' && detectedPlatform !== 'youtube' && (
+                <div className="platform-detected-badge">
+                  ✨ {detectedPlatform.charAt(0).toUpperCase() + detectedPlatform.slice(1)} URL detected
+                </div>
+              )}
+
+              {/* YouTube Specific Block Warning */}
+              {isYoutubeBlocked && (
+                <div className="youtube-warning">
+                  ⚠️ YouTube downloads are currently not supported.
+                </div>
+              )}
             </div>
 
             {/* Format Selection */}
-            <div className="form-group" style={{ marginTop: '1.5rem' }}>
+            <div className="form-group" style={{ marginTop: '0.75rem' }}>
               <label className="label">Download Format</label>
               <div className="format-selector">
                 <div className="format-option">
@@ -516,7 +606,7 @@ export default function Home() {
             <button 
               type="submit" 
               className={`download-btn ${loading ? 'loading' : ''} ${isDownloading ? 'downloading' : ''}`} 
-              disabled={loading || isDownloading || !url}
+              disabled={loading || isDownloading || !url || isYoutubeBlocked}
             >
               {loading ? (
                 <>
@@ -690,72 +780,93 @@ export default function Home() {
         </main>
       </section>
 
-      {/* Supported Platforms Wall (T2 Logo Wall Hairline) */}
-      <section className="section-container compatibility-wall">
-        <h2 className="compatibility-label">Supported Social Networks</h2>
-        <div className="logo-grid">
-          <div className="logo-item">
-            <span className="logo-icon">📺</span>
-            <span>YouTube</span>
+      {/* Trust Badges Section */}
+      <section className="section-container trust-section">
+        <div className="trust-badges">
+          <div className="trust-badge">
+            <span className="trust-badge-check">✓</span>
+            <span className="trust-badge-text">No Login Required</span>
           </div>
-          <div className="logo-item">
-            <span className="logo-icon">📸</span>
-            <span>Instagram</span>
+          <div className="trust-badge">
+            <span className="trust-badge-check">✓</span>
+            <span className="trust-badge-text">No Ads</span>
           </div>
-          <div className="logo-item">
-            <span className="logo-icon">🎵</span>
-            <span>TikTok</span>
+          <div className="trust-badge">
+            <span className="trust-badge-check">✓</span>
+            <span className="trust-badge-text">Private Downloads</span>
           </div>
-          <div className="logo-item">
-            <span className="logo-icon">🐦</span>
-            <span>Twitter / X</span>
+          <div className="trust-badge">
+            <span className="trust-badge-check">✓</span>
+            <span className="trust-badge-text">Fast Processing</span>
           </div>
-          <div className="logo-item">
-            <span className="logo-icon">📌</span>
-            <span>Pinterest</span>
+        </div>
+      </section>
+
+      {/* Supported Platforms Section */}
+      <section className="section-container compatibility-wall" id="platforms">
+        <h2 className="section-title-centered">Supported Platforms</h2>
+        <div className="platform-card-grid">
+          <div className="platform-card">
+            <span className="platform-card-icon">📸</span>
+            <h3 className="platform-card-name">Instagram</h3>
+            <p className="platform-card-desc">Reels, videos, and post photos</p>
           </div>
-          <div className="logo-item">
-            <span className="logo-icon">📘</span>
-            <span>Facebook</span>
+          <div className="platform-card">
+            <span className="platform-card-icon">🎵</span>
+            <h3 className="platform-card-name">TikTok</h3>
+            <p className="platform-card-desc">High-quality video downloads</p>
           </div>
-          <div className="logo-item">
-            <span className="logo-icon">🤖</span>
-            <span>Reddit</span>
+          <div className="platform-card">
+            <span className="platform-card-icon">📘</span>
+            <h3 className="platform-card-name">Facebook</h3>
+            <p className="platform-card-desc">Public videos and post clips</p>
           </div>
-          <div className="logo-item">
-            <span className="logo-icon">🎥</span>
-            <span>Vimeo</span>
+          <div className="platform-card">
+            <span className="platform-card-icon">🐦</span>
+            <h3 className="platform-card-name">X (Twitter)</h3>
+            <p className="platform-card-desc">Save shared videos and GIF clips</p>
           </div>
-          <div className="logo-item">
-            <span className="logo-icon">✨</span>
-            <span>and Many More</span>
+          <div className="platform-card">
+            <span className="platform-card-icon">📌</span>
+            <h3 className="platform-card-name">Pinterest</h3>
+            <p className="platform-card-desc">Video pins and ideas</p>
+          </div>
+          <div className="platform-card">
+            <span className="platform-card-icon">🤖</span>
+            <h3 className="platform-card-name">Reddit</h3>
+            <p className="platform-card-desc">Video downloads with audio merged</p>
+          </div>
+          <div className="platform-card">
+            <span className="platform-card-icon">🎥</span>
+            <h3 className="platform-card-name">Vimeo</h3>
+            <p className="platform-card-desc">VOD clips and portfolio videos</p>
           </div>
         </div>
       </section>
 
       {/* Features Grid */}
       <section className="section-container features-section" id="features">
-        <h2 className="features-section-title">Designed for creators and developers</h2>
+        <h2 className="features-section-title">Designed for privacy and speed</h2>
         <div className="features-grid">
           <div className="feature-card">
-            <span className="feature-icon">🎬</span>
-            <h3 className="feature-title">Download Video</h3>
+            <span className="feature-icon">⚡</span>
+            <h3 className="feature-title">Fast Downloads</h3>
             <p className="feature-description">
-              Save high-definition videos in standard MP4 formats with direct, high-speed streaming integration.
+              High-speed media retrieval directly from the content delivery networks of your favorite social platforms.
             </p>
           </div>
           <div className="feature-card">
-            <span className="feature-icon">🎵</span>
-            <h3 className="feature-title">Download Audio</h3>
+            <span className="feature-icon">📱</span>
+            <h3 className="feature-title">Multiple Platforms</h3>
             <p className="feature-description">
-              Extract audio tracks from any supported platform and download them as high-quality, high-bitrate MP3 files.
+              Optimized extraction support for Instagram, TikTok, Facebook, X (Twitter), Pinterest, Reddit, and Vimeo.
             </p>
           </div>
           <div className="feature-card">
             <span className="feature-icon">🔒</span>
-            <h3 className="feature-title">Zero Logging & Tracking</h3>
+            <h3 className="feature-title">Private by Design</h3>
             <p className="feature-description">
-              We never save your URLs or downloaded files. All downloads occur locally, keeping your media consumption completely secure and private.
+              Zero logs, zero tracking. All queries and media stitching processes occur on-the-fly, keeping your media use private.
             </p>
           </div>
         </div>
@@ -876,7 +987,7 @@ export default function Home() {
             </summary>
             <div className="faq-answer">
               <p>
-                Currently, VidNestor supports YouTube (including channels and playlist expansion), Instagram (Reels & posts), TikTok, Twitter/X, Pinterest, Facebook, Reddit, Vimeo, and many other platforms.
+                Currently, VidNestor supports Instagram (Reels & posts), TikTok, Facebook, X (Twitter), Pinterest, Reddit, Vimeo, and many other platforms. Please note that YouTube downloads are not supported.
               </p>
             </div>
           </details>
